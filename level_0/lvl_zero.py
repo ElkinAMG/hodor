@@ -1,24 +1,38 @@
-#!/usr/bin/python3
-'''
+#!/usr/bin/env python3
+"""
+Este módulo envía peticiones POST a un host específico.
+"""
 
-This module sends post petitions toward a host.
+from typing import Tuple
+import httpx
 
-'''
-from requests import post
 
-url = 'http://158.69.76.135/level0.php'
+async def send_post_request(url: str, data: dict) -> Tuple[int, bool]:
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, data=data)
+    return response.status_code, response.status_code == 200
 
-# POST action
-failures = 0
-success = 0
 
-for i in range(1024):
-    r = post(url, data={'id': '1531', 'holdthedoor': 'Submit'})
-    if r.status_code != 200:
-        print('{} - FAILURE'.format(r.status_code))
-        failures += 1
-    else:
-        print('{} - SUCCESS'.format(r.status_code))
-        success += 1
+async def main():
+    url = "http://158.69.76.135/level0.php"
+    data = {"id": "1531", "holdthedoor": "Submit"}
 
-print("Successes → {}\nFailures → {}".format(success, failures))
+    failures = 0
+    successes = 0
+
+    for _ in range(1024):
+        status_code, success = await send_post_request(url, data)
+        if success:
+            print(f"{status_code} - SUCCESS")
+            successes += 1
+        else:
+            print(f"{status_code} - FAILURE")
+            failures += 1
+
+    print(f"Successes → {successes}\nFailures → {failures}")
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(main())
